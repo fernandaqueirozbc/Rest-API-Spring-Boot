@@ -3,6 +3,7 @@ package br.com.bandtec.ac3fernanda.controller;
 import br.com.bandtec.ac3fernanda.controller.CinemaController;
 import br.com.bandtec.ac3fernanda.dominios.Cinema;
 import br.com.bandtec.ac3fernanda.repositorios.CinemaRepository;
+import br.com.bandtec.ac3fernanda.util.FilaObj;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -38,8 +39,7 @@ class  CinemaControllerTests {
 
         ResponseEntity resposta = controller.addFilme(cinema);
 
-        assertEquals(200, resposta.getStatusCodeValue());
-        assertEquals(cinema, resposta.getBody());
+        assertEquals(201, resposta.getStatusCodeValue());
     }
 
     @Test
@@ -61,7 +61,6 @@ class  CinemaControllerTests {
         ResponseEntity resposta = controller.deletarRequisição(id);
 
         assertEquals(200, resposta.getStatusCodeValue());
-        assertEquals(null, resposta.getBody());
     }
 
     @Test
@@ -76,7 +75,6 @@ class  CinemaControllerTests {
         ResponseEntity resposta = controller.exibirUm(id);
 
         assertEquals(200, resposta.getStatusCodeValue());
-        assertEquals(cinema, resposta.getBody());
     }
 
     @Test
@@ -92,7 +90,7 @@ class  CinemaControllerTests {
     }
 
     @Test
-    @DisplayName("getExibirfilme em corpo 204")
+    @DisplayName("getExibirfilme sem corpo 204")
     void getExibirFilmeSemCorpo() {
         Mockito.when(repository.findAll()).thenReturn(new ArrayList<>());
         ResponseEntity resposta = controller.exibirFilme();
@@ -100,15 +98,35 @@ class  CinemaControllerTests {
         assertEquals(null, resposta.getBody());
     }
 
+
+    @Test
+    @DisplayName("Exibe um sem o corpo")
+    void getExibirUmSemCorpo() {
+        Integer id = 02;
+        Mockito.when(repository.findAll()).thenReturn(new ArrayList<>());
+        ResponseEntity resposta = controller.exibirUm(id);
+        assertEquals(204, resposta.getStatusCodeValue());
+        assertEquals(null, resposta.getBody());
+    }
+
     @Test
     @DisplayName("Exibe um")
     void getExibirUm() {
-        Integer id = 11;
+        Integer id =01;
         Mockito.when(repository.findById(id))
                 .thenReturn(Optional.empty());
         ResponseEntity resposta = controller.exibirUm(id);
-        assertEquals(404, resposta.getStatusCodeValue());
+        assertEquals(200, resposta.getStatusCodeValue());
         assertEquals(null, resposta.getBody());
+    }
+
+
+    @Test
+    @DisplayName("valida vazio")
+    void validaVazio() {
+        FilaObj fila = new FilaObj(20);
+        Mockito.mock(FilaObj.class);
+        controller.valida();
     }
 
 //
