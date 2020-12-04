@@ -92,9 +92,13 @@ class  CinemaControllerTests {
     @Test
     @DisplayName("getExibirfilme sem corpo 204")
     void getExibirFilmeSemCorpo() {
-        Mockito.when(repository.findAll()).thenReturn(new ArrayList<>());
-        ResponseEntity resposta = controller.exibirFilme();
-        assertEquals(204, resposta.getStatusCodeValue());
+        Integer id = 02;
+        Mockito.when(repository.findById(id))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity resposta = controller.exibirUm(id);
+
+        assertEquals(404, resposta.getStatusCodeValue());
         assertEquals(null, resposta.getBody());
     }
 
