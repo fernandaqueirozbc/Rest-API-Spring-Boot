@@ -1,0 +1,18 @@
+01 Cinema                22-10-2020 18:16:54          1.0 VERSION 
+01  CODIGO FILME                     NOME FILME              HORARIO                    
+
+                   0 DADOS
+01 Cinema                22-10-2020 18:17:18          1.0 VERSION 
+01  CODIGO FILME                     NOME FILME              HORARIO                    
+
+                   0 DADOS
+01 Cinema                22-10-2020 19:59:00          1.0 VERSION 
+01  CODIGO FILME                     NOME FILME              HORARIO                    
+
+    1               aloalo                15:00
+                   1 DADOS
+01 Cinema                22-10-2020 20:01:12          1.0 VERSION 
+01  CODIGO FILME                     NOME FILME              HORARIO                    
+
+    1               aloalo                15:00
+                   1 DADOS

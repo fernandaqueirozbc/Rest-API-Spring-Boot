@@ -16,9 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
+import java.util.*;
 
 @RestController
 @RequestMapping("/filmes")
@@ -26,7 +24,10 @@ public class CinemaController {
 
     PilhaObj<Cinema> pilhaCinema = new PilhaObj<>(500);
     FilaObj<Cinema> filaObj = new FilaObj<>(500);
-    private Integer finalFilaObj = 0;
+    FilaObj<Integer> valorFila = new FilaObj<>(500);
+    private Map<UUID, Integer> result = new HashMap<>();
+    private Integer finalFilaObj = 1;
+    private Integer finalPilhaObj = 0;
 
     public CinemaController() {
     }
@@ -34,21 +35,11 @@ public class CinemaController {
     @Autowired
     private CinemaRepository repository;
 
-    @Scheduled(fixedRate = 10000)
-    public void agendador() {
-        if (filaObj.isEmpty()) {
-            finalFilaObj = 0;
-        } else {
-            filaObj.poll();
-        }
-
-    }
-
     @PostMapping
     public ResponseEntity addFilme(@RequestBody Cinema filme) {
         try {
-            filaObj.insert(filme);
             pilhaCinema.push(filme);
+            finalPilhaObj++;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,51 +56,72 @@ public class CinemaController {
     public ResponseEntity desfazer() {
         //Metodos ".exibe" para consultar no console a execução e validar o funcionamento
         pilhaCinema.exibe();
-        try {
+        if (repository.existsById(finalPilhaObj)) {
+
             pilhaCinema.pop();
-            repository.deleteById(finalFilaObj);
+
+            repository.deleteById(finalPilhaObj);
+
             pilhaCinema.exibe();
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().build();
+
     }
 
     @GetMapping("/exibir/{id}")
-    public ResponseEntity exibirUm(@PathVariable Cinema id) {
-        filaObj.insert(id);
-        return ResponseEntity.accepted().build();
+    public ResponseEntity exibirUm(@PathVariable int id) {
+        return ResponseEntity.ok(this.repository.findById(id));
     }
 
-    @GetMapping("/exibir/agendamento")
-    public ResponseEntity agenda() {
 
-        if (repository.existsById(finalFilaObj))
-        {
-            return ResponseEntity.ok(repository.findById(finalFilaObj));
-        }
-        else
-        {
+    @DeleteMapping("/{id}")
+    public ResponseEntity deletarRequisição(@PathVariable int id) {
+
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            filaObj.poll();
+            UUID identificador = UUID.randomUUID();
+
+
+            return ResponseEntity.ok("Identificador da requisição :" + (identificador));
+
+        } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @Scheduled(fixedRate = 20000)
+    public void valida() {
+        if (!filaObj.isEmpty()) {
+            System.out.println("Não há requisições para processar");
+        } else {
+            finalFilaObj = valorFila.poll();
+        }
+
     }
 
     @PostMapping(value = "/upload")
     public ResponseEntity importar(@RequestBody byte[] arquivo) throws IOException {
 
+        String nomeArquivo = "cinema.txt";
+        Path path = Paths.get(nomeArquivo);
+        BufferedReader entrada = null;
+        Files.write(path, arquivo);
+
         String registro;
         Double valor;
+        Integer cod;
         String nome, horario;
         String tipoRegistro;
-        String nomeArquivo = "Cinema.txt";
         Integer cont = 0;
 
-        BufferedReader entrada = null;
-        Path path = Paths.get(nomeArquivo);
-        Files.write(path, arquivo);
         List<Cinema> listaFilme = new ArrayList<>();
-        Cinema novoFilme = new Cinema();
-        novoFilme.setArquivo(arquivo);
+        Cinema novoCinema = new Cinema();
+        novoCinema.setArquivo(arquivo);
+
 
         try {
             entrada = new BufferedReader(new FileReader(nomeArquivo));
@@ -123,30 +135,17 @@ public class CinemaController {
                 Cinema cinema = new Cinema();
                 tipoRegistro = registro.substring(0, 2);
 
-                if (tipoRegistro.equals("00")) {
-                    System.out.println("Header");
-                    System.out.println("Tipo de arquivo: " + registro.substring(2, 6));
-                    System.out.println("Data/hora de geração do arquivo: " + registro.substring(7, 30));
-                    System.out.println("Versão do layout: " + registro.substring(30, 32));
-                } else if (tipoRegistro.equals("01")) {
-                    System.out.println("\nTrailer");
-                    int qtdRegistro = Integer.parseInt(registro.substring(2, 12));
-                    if (qtdRegistro == cont) {
-                        System.out.println("Quantidade de registros gravados compatível com quantidade lida");
-                    } else {
-                        System.out.println("Quantidade de registros gravados não confere com quantidade lida");
-                    }
-                } else if (tipoRegistro.equals("02")) {
+                if (tipoRegistro.equals("01")) {
                     if (cont == 0) {
                         System.out.println();
-                        System.out.printf("%-5s %-8s %6s\n", "Nome Filme", "Horario", "Valor ingresso");
 
                     }
 
-                    nome = registro.substring(2, 10);
-                    horario = registro.substring(10, 25);
-                    valor = Double.parseDouble(registro.substring(25, 30));
-                    System.out.println(nome + " " + " " + horario);
+                    nome = registro.substring(2, 22);
+                    horario = registro.substring(23, 33);
+                    valor = Double.parseDouble(registro.substring(33, 40));
+                    System.out.println(nome + " " + " " + horario + " " + " " + valor);
+
 
                     cinema.setNomeFilme(nome);
                     cinema.setHorario(horario);
@@ -155,7 +154,6 @@ public class CinemaController {
                     listaFilme.add(cinema);
 
                     cont++;
-
 
                 } else {
                     System.out.println("Tipo de registro inválido");
@@ -168,12 +166,10 @@ public class CinemaController {
             }
 
             entrada.close();
+        } catch (IOException e) {
+            System.err.printf("Erro ao ler arquivo: %s.\n", e.getMessage());
         }
-         catch (IOException e)
-            {
-                System.err.printf("Erro ao ler arquivo: %s.\n", e.getMessage());
-            }
-            return ResponseEntity.created(null).build();
-        }
+        return ResponseEntity.created(null).build();
     }
+}
 
