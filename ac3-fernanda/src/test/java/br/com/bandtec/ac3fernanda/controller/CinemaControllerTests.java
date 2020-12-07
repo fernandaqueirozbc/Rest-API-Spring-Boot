@@ -137,7 +137,9 @@ class  CinemaControllerTests {
 //    @Test
 //    @DisplayName("upload")
 //    void importar() {
-//        String arquivo = "cinema.txt";
+//        Cinema novoCinema = new Cinema();
+//        byte[] arquivo;
+//        novoCinema.setArquivo(arquivo);
 //        ResponseEntity resposta = controller.importar(arquivo);
 //    }
 

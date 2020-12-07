@@ -53,21 +53,21 @@ public class CinemaController {
     }
 
     @PostMapping("/desfazer")
-    public ResponseEntity desfazer() {
-        //Metodos ".exibe" para consultar no console a execução e validar o funcionamento
-        pilhaCinema.exibe();
-        if (repository.existsById(finalPilhaObj)) {
-
-            pilhaCinema.pop();
-
-            repository.deleteById(finalPilhaObj);
-
+        public ResponseEntity desfazer() {
+            //Metodos ".exibe" para consultar no console a execução e validar o funcionamento
             pilhaCinema.exibe();
+            if (repository.existsById(finalPilhaObj)) {
 
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+                pilhaCinema.pop();
+
+                repository.deleteById(finalPilhaObj);
+
+                pilhaCinema.exibe();
+
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
 
     }
 
