@@ -22,14 +22,18 @@ class BoletimController{
         return println(boletimAlunos)
     }
 
-    @GetMapping("{id}")
-    @ResponseBody
+    @GetMapping("/{id}")
     fun ExibirUmAluno(@PathVariable id: Int){
         return println(boletimAlunos.get(id))
     }
 
-    @DeleteMapping("{id}")
-    fun delete(@PathVariable id: Int) {
-            boletimAlunos.removeAt(id-1)
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable id: Int) : String {
+        if(boletimAlunos.size -1>= id) {
+            boletimAlunos.removeAt(id - 1)
+            return "Boletim excluído com sucesso"
+        }else{
+            return "Boletim não encontrado!"
+        }
     }
 }
