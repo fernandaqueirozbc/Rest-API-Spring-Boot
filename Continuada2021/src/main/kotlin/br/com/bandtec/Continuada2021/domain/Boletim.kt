@@ -13,7 +13,7 @@ data class Boletim(
         val nota2: Double
 )
 {
-    fun media() = (nota1 + nota2) / 2
+    fun media() = (nota1 + nota2) / 2 ;
 
     override fun toString(): String {
         return "{RA:$RA," +
