@@ -30,6 +30,6 @@ class BoletimController{
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Int) {
-            boletimAlunos.removeAt(id)
+            boletimAlunos.removeAt(id-1)
     }
 }
